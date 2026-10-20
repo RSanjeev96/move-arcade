@@ -34,7 +34,7 @@ if (opt.menu !== 'false') {
   const p = await page();
   await p.goto(`${base}?demo=menu&game=${game}${extra}`);
   await wait(2500);
-  await p.screenshot({ path: `${out}/00-menu.png` });
+  await p.screenshot({ path: `${out}/00-menu.png`, timeout: 120000 });
   await p.close();
 }
 
@@ -44,11 +44,11 @@ await p.goto(`${base}?demo=play&game=${game}${extra}`);
 const shots = opt.shots.split(',').filter(Boolean).map(Number);
 for (const s of shots) {
   await wait(Math.max(0, s * 1000 - (Date.now() - t0)));
-  await p.screenshot({ path: `${out}/play-${String(s).padStart(3, '0')}s.png` });
+  await p.screenshot({ path: `${out}/play-${String(s).padStart(3, '0')}s.png`, timeout: 120000 });
 }
 if (Number(opt.end) > 0) {
   await wait(Math.max(0, Number(opt.end) * 1000 - (Date.now() - t0)));
-  await p.screenshot({ path: `${out}/end.png` });
+  await p.screenshot({ path: `${out}/end.png`, timeout: 120000 });
 }
 const dbg = await p.evaluate(() => window.__gameDebug ?? null).catch(() => null);
 console.log('__gameDebug:', JSON.stringify(dbg));
