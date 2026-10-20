@@ -2,6 +2,8 @@
 export interface Pt {
   x: number;
   y: number;
+  /** Depth in pixels relative to the hips (smaller = closer to the camera). Rough, but useful for punches. */
+  z: number;
   v: number;
 }
 

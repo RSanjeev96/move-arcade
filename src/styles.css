@@ -1069,3 +1069,151 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- shared game UI (kit.ts) ---- */
+.choice-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.choice-row .seg .btn {
+  text-transform: none;
+}
+.res-rank.tone-blue {
+  background-image: linear-gradient(180deg, #fff, var(--cyan) 60%, var(--violet));
+  filter: drop-shadow(0 0 30px rgba(31, 184, 255, 0.6));
+}
+.res-rank.tone-red {
+  background-image: linear-gradient(180deg, #fff, #ff5577);
+}
+.center-msg {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+.center-msg.good {
+  color: var(--mint);
+}
+.center-msg.bad {
+  color: #ff5d7d;
+}
+.game-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+.game-root > canvas.gl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.ghud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--ui);
+  z-index: 3;
+}
+.ghud > * {
+  position: absolute;
+}
+.ghud .tl {
+  top: clamp(10px, 2vh, 24px);
+  left: clamp(12px, 2vw, 32px);
+}
+.ghud .tr {
+  top: clamp(10px, 2vh, 24px);
+  right: clamp(12px, 2vw, 32px);
+  text-align: right;
+}
+.ghud .tc {
+  top: clamp(10px, 2vh, 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.ghud .bl {
+  bottom: clamp(14px, 3vh, 34px);
+  left: clamp(12px, 2vw, 32px);
+}
+.ghud .br {
+  bottom: clamp(14px, 3vh, 34px);
+  right: clamp(12px, 2vw, 32px);
+}
+.ghud .bc {
+  bottom: clamp(14px, 3vh, 34px);
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.ghud .panel {
+  background: rgba(10, 5, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 10px 16px;
+  backdrop-filter: blur(8px);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.stat b {
+  font: 800 clamp(22px, 2.8vw, 46px) var(--num);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+.stat span {
+  font-size: clamp(10px, 0.95vw, 14px);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.ghud .hud-cam {
+  bottom: clamp(14px, 3vh, 34px);
+  right: clamp(12px, 2vw, 32px);
+  width: clamp(140px, 16vw, 260px);
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.game-menu .menu-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: clamp(12px, 1.6vw, 26px);
+  min-height: 0;
+}
+.game-menu .menu-body > * {
+  min-height: 0;
+  overflow-y: auto;
+}
+.game-menu .how {
+  padding: clamp(14px, 1.8vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.game-menu .how h3 {
+  margin: 0;
+  font: 800 clamp(18px, 2vw, 30px) var(--ui);
+}
+.game-menu .how li {
+  color: var(--muted);
+  font-size: clamp(13px, 1.25vw, 19px);
+  margin: 4px 0;
+}
+.game-menu .side {
+  padding: clamp(14px, 1.8vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 18px);
+}
+.game-host {
+  position: absolute;
+  inset: 0;
+}

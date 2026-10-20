@@ -33,6 +33,7 @@ export class CameraPose implements PoseSource {
   private frames: PoseFrame[] = [];
   private fx: OneEuro[] = [];
   private fy: OneEuro[] = [];
+  private fz: OneEuro[] = [];
   private running = true;
   private lastSeen = 0;
   private lastTs = 0;
@@ -49,6 +50,7 @@ export class CameraPose implements PoseSource {
     for (let i = 0; i < 33; i++) {
       this.fx.push(new OneEuro(1.5, 0.008, 1.0));
       this.fy.push(new OneEuro(1.5, 0.008, 1.0));
+      this.fz.push(new OneEuro(1.0, 0.004, 1.0));
     }
     this.frames.push({ t: performance.now(), lm: null, w: video.videoWidth || 1280, h: video.videoHeight || 720 });
     this.loop();
@@ -116,7 +118,7 @@ export class CameraPose implements PoseSource {
     const start = performance.now();
     const ts = Math.max(this.lastTs + 1, Math.round(start));
     this.lastTs = ts;
-    let raw: { x: number; y: number; visibility?: number }[] | undefined;
+    let raw: { x: number; y: number; z: number; visibility?: number }[] | undefined;
     try {
       raw = this.landmarker.detectForVideo(video, ts).landmarks[0];
     } catch {
@@ -135,6 +137,7 @@ export class CameraPose implements PoseSource {
       if (captured - this.lastSeen > 500) {
         this.fx.forEach((f) => f.reset());
         this.fy.forEach((f) => f.reset());
+        this.fz.forEach((f) => f.reset());
       }
       pushFrame(this.frames, { t: captured, lm: null, w, h });
       return;
@@ -143,6 +146,7 @@ export class CameraPose implements PoseSource {
     const lm: Pt[] = raw.map((p, i) => ({
       x: this.fx[i].filter((1 - p.x) * w, captured),
       y: this.fy[i].filter(p.y * h, captured),
+      z: this.fz[i].filter(p.z * w, captured),
       v: p.visibility ?? 1,
     }));
     pushFrame(this.frames, { t: captured, lm, w, h });
@@ -175,6 +179,14 @@ export interface SimParams {
   duck?: number;
   /** Hip rise as a fraction of torso length. */
   rise?: number;
+  /** Wrist depth relative to the shoulders in shoulder widths (negative = toward the camera). */
+  lWristZ?: number;
+  rWristZ?: number;
+  /** Knee lift for running in place, in shoulder widths. */
+  lKneeUp?: number;
+  rKneeUp?: number;
+  /** Torso tilt in radians (+ = leaning right). */
+  tilt?: number;
 }
 
 export const SIM_REST: SimParams = {
@@ -214,25 +226,41 @@ export class SimPose implements PoseSource {
     const torsoPx = SimPose.TORSO * s;
     const cx = SimPose.W / 2 + (p.lean ?? 0) * s;
     const cy = 250 + (p.duck ?? 0) * torsoPx - (p.rise ?? 0) * torsoPx;
-    const px = (v: V2): Pt => ({ x: cx + v.x * s, y: cy - v.y * s, v: 0.98 });
+    const tilt = p.tilt ?? 0;
+    // Tilt rotates the upper body about the hips.
+    const hipC = { x: 0, y: -SimPose.TORSO };
+    const rot = (v: V2): V2 => {
+      if (!tilt || v.y < hipC.y) return v;
+      const dx = v.x - hipC.x;
+      const dy = v.y - hipC.y;
+      const c = Math.cos(-tilt);
+      const sn = Math.sin(-tilt);
+      return { x: hipC.x + dx * c - dy * sn, y: hipC.y + dx * sn + dy * c };
+    };
+    const px = (v: V2, z = 0): Pt => {
+      const r = rot(v);
+      return { x: cx + r.x * s, y: cy - r.y * s, z: z * s, v: 0.98 };
+    };
     const elbow = (w: V2, side: number): V2 => ({ x: side * 0.5 + (w.x - side * 0.5) * 0.5, y: w.y * 0.5 - 0.05 });
     const lm: Pt[] = new Array(33).fill(null).map(() => px({ x: 0, y: 0.8 }));
     const duckBend = Math.max(0, p.duck ?? 0);
+    const lk = p.lKneeUp ?? 0;
+    const rk = p.rKneeUp ?? 0;
     lm[LM.nose] = px({ x: 0, y: 0.78 });
     lm[LM.lShoulder] = px({ x: -0.5, y: 0 });
     lm[LM.rShoulder] = px({ x: 0.5, y: 0 });
-    lm[LM.lElbow] = px(p.lElbow ?? elbow(p.lWrist, -1));
-    lm[LM.rElbow] = px(p.rElbow ?? elbow(p.rWrist, 1));
-    lm[LM.lWrist] = px(p.lWrist);
-    lm[LM.rWrist] = px(p.rWrist);
-    lm[LM.lIndex] = px({ x: p.lWrist.x, y: p.lWrist.y - 0.15 });
-    lm[LM.rIndex] = px({ x: p.rWrist.x, y: p.rWrist.y - 0.15 });
-    lm[LM.lHip] = px({ x: -0.32, y: -SimPose.TORSO });
-    lm[LM.rHip] = px({ x: 0.32, y: -SimPose.TORSO });
-    lm[LM.lKnee] = px({ x: -0.34, y: -SimPose.TORSO - 1.2 + duckBend * 1.5 });
-    lm[LM.rKnee] = px({ x: 0.34, y: -SimPose.TORSO - 1.2 + duckBend * 1.5 });
-    lm[LM.lAnkle] = px({ x: -0.34, y: -SimPose.TORSO - 2.4 + duckBend * 1.7 });
-    lm[LM.rAnkle] = px({ x: 0.34, y: -SimPose.TORSO - 2.4 + duckBend * 1.7 });
+    lm[LM.lElbow] = px(p.lElbow ?? elbow(p.lWrist, -1), (p.lWristZ ?? 0) * 0.5);
+    lm[LM.rElbow] = px(p.rElbow ?? elbow(p.rWrist, 1), (p.rWristZ ?? 0) * 0.5);
+    lm[LM.lWrist] = px(p.lWrist, p.lWristZ ?? 0);
+    lm[LM.rWrist] = px(p.rWrist, p.rWristZ ?? 0);
+    lm[LM.lIndex] = px({ x: p.lWrist.x, y: p.lWrist.y - 0.15 }, p.lWristZ ?? 0);
+    lm[LM.rIndex] = px({ x: p.rWrist.x, y: p.rWrist.y - 0.15 }, p.rWristZ ?? 0);
+    lm[LM.lHip] = { ...px({ x: -0.32, y: -SimPose.TORSO }) };
+    lm[LM.rHip] = { ...px({ x: 0.32, y: -SimPose.TORSO }) };
+    lm[LM.lKnee] = px({ x: -0.34, y: -SimPose.TORSO - 1.2 + duckBend * 1.5 + lk });
+    lm[LM.rKnee] = px({ x: 0.34, y: -SimPose.TORSO - 1.2 + duckBend * 1.5 + rk });
+    lm[LM.lAnkle] = px({ x: -0.34, y: -SimPose.TORSO - 2.4 + duckBend * 1.7 + lk * 1.4 });
+    lm[LM.rAnkle] = px({ x: 0.34, y: -SimPose.TORSO - 2.4 + duckBend * 1.7 + rk * 1.4 });
     return lm;
   }
 

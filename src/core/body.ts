@@ -40,6 +40,9 @@ export interface Body {
   rAnkle: V2;
   lWristV: number;
   rWristV: number;
+  /** Wrist depth relative to the shoulders, in shoulder widths (negative = toward the camera). Rough. */
+  lWristZ: number;
+  rWristZ: number;
   /** Sideways shift from the calibrated position, in calibrated shoulder widths (+ = right). */
   lean: number;
   /** How far the shoulders dropped, as a fraction of calibrated torso length. */
@@ -90,6 +93,8 @@ export class BodyTracker {
       rAnkle: { x: 0.3, y: -4 },
       lWristV: 0,
       rWristV: 0,
+      lWristZ: 0,
+      rWristZ: 0,
       lean: 0,
       duck: 0,
       rise: 0,
@@ -150,6 +155,8 @@ export class BodyTracker {
       rAnkle: toBody(lm[LM.rAnkle]),
       lWristV: lm[LM.lWrist].v,
       rWristV: lm[LM.rWrist].v,
+      lWristZ: (lm[LM.lWrist].z - (ls.z + rs.z) / 2) / s,
+      rWristZ: (lm[LM.rWrist].z - (ls.z + rs.z) / 2) / s,
       lean,
       duck,
       rise,
