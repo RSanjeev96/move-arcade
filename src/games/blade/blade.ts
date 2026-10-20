@@ -641,9 +641,11 @@ export class BladeGame {
       const settle = ease(prog / 0.5);
       const spinQ = new THREE.Quaternion().setFromEuler(new THREE.Euler((1 - settle) * ln.spin, (1 - settle) * ln.spin * 0.6, 0));
       g.quaternion.copy(ln.quat).multiply(spinQ);
-      const s = 0.5 + 0.5 * rise;
-      g.scale.setScalar(s);
-      if (z > 3) this.releaseNote(ln);
+      // Missed blocks shrink away after passing the player instead of flying through the camera.
+      const past = Math.max(0, (z - (GRID.hitZ + 0.45)) / 0.8);
+      const s = (0.5 + 0.5 * rise) * Math.max(0, 1 - past);
+      g.scale.setScalar(Math.max(0.001, s));
+      if (past >= 1) this.releaseNote(ln);
       void dt;
     }
   }
