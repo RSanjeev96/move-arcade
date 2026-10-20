@@ -1,0 +1,28 @@
+import { chromium } from 'playwright';
+const out = process.argv[2];
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--autoplay-policy=no-user-gesture-required'] });
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+const p = await ctx.newPage();
+const errs = [];
+p.on('pageerror', (e) => errs.push(String(e)));
+p.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+await p.goto('http://localhost:4173/move-arcade/?demo=menu&game=blade');
+await wait(2000);
+await p.click('#yt');
+await wait(800);
+await p.fill('#yt-url', process.env.VID ?? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+await p.screenshot({ path: `${out}/yt-1-pick.png` });
+await p.click('#go');
+await p.waitForSelector('#tap', { timeout: 30000 });
+await wait(3000);
+const period = 60000 / 113;
+for (let i = 0; i < 10; i++) { await p.dispatchEvent('#tap', 'pointerdown'); await wait(period); }
+await p.screenshot({ path: `${out}/yt-2-tap.png` });
+console.log('bpm text:', await p.textContent('.tap-bpm b'));
+await p.click('#start');
+await wait(14000);
+await p.screenshot({ path: `${out}/yt-3-play.png` });
+console.log('debug:', JSON.stringify(await p.evaluate(() => window.__blade)));
+console.log('errors:', errs.slice(0, 8).join('\n') || 'none');
+await browser.close();

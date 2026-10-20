@@ -6,7 +6,7 @@ export interface SongInfo {
   id: string;
   title: string;
   artist: string;
-  source: 'bundled' | 'device';
+  source: 'bundled' | 'device' | 'youtube';
   file?: string;
   credit?: string;
   colors: [string, string];

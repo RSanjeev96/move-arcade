@@ -3,6 +3,9 @@ import { local } from '../../core/storage';
 import { bests, esc, html, loading, mount, showResults, topbar } from '../../ui/kit';
 import type { GameEnv } from '../types';
 import { BladeGame, type BladeResult } from './blade';
+import { BufferClock, YouTubeClock, gridAnalysis, type SongClock } from './clock';
+import { chooseYouTube, setDockMode } from './youtube';
+import type { Analysis } from '../../core/beat';
 import { DIFFICULTIES, generateMap, type Difficulty } from './mapgen';
 import { addDeviceSong, fmtTime, listSongs, loadSong, removeDeviceSong, type LoadedSong, type SongInfo } from './songs';
 
@@ -20,7 +23,7 @@ export default async function open(env: GameEnv): Promise<void> {
   let autoplay = env.params.get('autoplay') === '1';
 
   for (;;) {
-    let song: SongInfo | null;
+    let song: SongInfo | 'youtube' | null;
     if (autoplay) {
       const songs = await listSongs();
       song = songs.find((s) => s.source === 'bundled') ?? songs[0] ?? null;
@@ -29,6 +32,10 @@ export default async function open(env: GameEnv): Promise<void> {
       song = await selectSong(env, prefs);
     }
     if (!song) return;
+    if (song === 'youtube') {
+      if ((await youtubeSession(env, prefs)) === 'home') return;
+      continue;
+    }
     let loaded: LoadedSong | undefined;
     for (;;) {
       const out = await play(env, prefs, song, loaded);
@@ -43,7 +50,7 @@ export default async function open(env: GameEnv): Promise<void> {
   }
 }
 
-async function selectSong(env: GameEnv, prefs: BladePrefs): Promise<SongInfo | null> {
+async function selectSong(env: GameEnv, prefs: BladePrefs): Promise<SongInfo | 'youtube' | null> {
   const songs = await listSongs();
   if (!prefs.songId || !songs.some((s) => s.id === prefs.songId)) prefs.songId = songs[0]?.id ?? null;
   const el = html(`
@@ -71,7 +78,10 @@ async function selectSong(env: GameEnv, prefs: BladePrefs): Promise<SongInfo | n
           </div>
           <div class="best"></div>
           <button class="btn primary big" data-hc id="play">${ICONS.play} Play</button>
-          <label class="btn ghost add">${ICONS.plus} Add a song from this tablet<input type="file" accept="audio/*" hidden></label>
+          <div class="add-row">
+            <label class="btn ghost add">${ICONS.plus} Song from this tablet<input type="file" accept="audio/*" hidden></label>
+            <button class="btn ghost" data-hc id="yt">${ICONS.play} YouTube song</button>
+          </div>
           <div class="note">Songs you add stay on this tablet only.</div>
         </div>
       </div>
@@ -119,8 +129,48 @@ async function selectSong(env: GameEnv, prefs: BladePrefs): Promise<SongInfo | n
       resolve(selectSong(env, prefs));
     });
     el.querySelector('#play')!.addEventListener('click', () => resolve(songs.find((x) => x.id === prefs.songId) ?? null));
+    el.querySelector('#yt')!.addEventListener('click', () => resolve('youtube'));
     el.querySelector('[data-act=back]')!.addEventListener('click', () => resolve(null));
   });
+}
+
+/** Play YouTube songs until the player goes back. Returns 'home' to leave the game entirely. */
+async function youtubeSession(env: GameEnv, prefs: BladePrefs): Promise<'songs' | 'home'> {
+  const picked = await chooseYouTube(env);
+  if (!picked) return 'songs';
+  const { yt, song } = picked;
+  const info: SongInfo = { id: `yt-${song.id}`, title: song.title, artist: 'YouTube', source: 'youtube', colors: ['#ff2d2d', '#8a3bff'], bpm: song.bpm };
+  const analysis = gridAnalysis(song.bpm, song.firstBeat, yt.duration || 240);
+  try {
+    for (;;) {
+      yt.setVolume(env.settings.musicVolume);
+      setDockMode('corner');
+      const out = await runGame(env, prefs, info, analysis, new YouTubeClock(yt, env.settings.audioOffset));
+      setDockMode('hidden');
+      if (out.kind === 'restart') continue;
+      if (out.kind === 'quit') return 'songs';
+      const act = await results(env, out.result, info);
+      if (act === 'again') continue;
+      return act === 'home' ? 'home' : 'songs';
+    }
+  } finally {
+    yt.destroy();
+    setDockMode('hidden');
+  }
+}
+
+async function runGame(env: GameEnv, prefs: BladePrefs, info: SongInfo, analysis: Analysis, clock: SongClock) {
+  env.cursor(false);
+  const map = generateMap(analysis, prefs.difficulty, { walls: prefs.walls });
+  const host = mount(env.root, html('<div class="screen game"></div>'));
+  const game = new BladeGame(
+    { root: host, pose: env.pose, body: env.body, audio: env.audio, settings: env.settings, demo: env.demo, cursor: env.cursor },
+    { info, analysis },
+    clock,
+    map,
+    { noFail: prefs.noFail, seek: Number(env.params.get('seek')) || 0 },
+  );
+  return game.run();
 }
 
 async function play(
@@ -139,15 +189,7 @@ async function play(
     await new Promise((r) => setTimeout(r, 2500));
     return null;
   }
-  const map = generateMap(song.analysis, prefs.difficulty, { walls: prefs.walls });
-  const host = mount(env.root, html('<div class="screen game"></div>'));
-  const game = new BladeGame(
-    { root: host, pose: env.pose, body: env.body, audio: env.audio, settings: env.settings, demo: env.demo, cursor: env.cursor },
-    song,
-    map,
-    { noFail: prefs.noFail, seek: Number(env.params.get('seek')) || 0 },
-  );
-  const out = await game.run();
+  const out = await runGame(env, prefs, info, song.analysis, new BufferClock(env.audio, song.buffer));
   if (out.kind === 'restart') return play(env, prefs, info, song);
   if (out.kind === 'quit') return null;
   return { song, result: out.result, again: false };

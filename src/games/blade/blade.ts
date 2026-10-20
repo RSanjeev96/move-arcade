@@ -13,7 +13,9 @@ import { BombKit, BlockKit, Debris, Saber, Shockwaves, Sparks, dirAngle, makeWal
 import { PALETTE, Stage } from './scene';
 import { Dir, DIR_VEC, type BeatMap, type Bomb, type Note, type Wall } from './mapgen';
 import { GRID, MIN_SWING_SPEED, Multiplier, bodyToWorld, judgeCut, judgement, notePos, rank, segmentHitsSquare, stars } from './hit';
-import type { LoadedSong } from './songs';
+import type { SongInfo } from './songs';
+import type { Analysis } from '../../core/beat';
+import type { SongClock } from './clock';
 
 export interface GameContext {
   root: HTMLElement;
@@ -138,7 +140,8 @@ export class BladeGame {
 
   constructor(
     private ctx: GameContext,
-    private song: LoadedSong,
+    private song: { info: SongInfo; analysis: Analysis },
+    private clock: SongClock,
     private map: BeatMap,
     private opts: { noFail: boolean; seek?: number },
   ) {
@@ -302,7 +305,7 @@ export class BladeGame {
       for (const ln of this.notes) if (ln.n.t < seek + 0.5) ln.done = true;
       for (const lb of this.bombs) if (lb.b.t < seek + 0.5) lb.done = true;
     }
-    audio.playSong(this.song.buffer, leadIn, seek);
+    this.clock.start(leadIn, seek);
     this.ctx.cursor(false);
     this.startedAt = performance.now();
     this.lastFrame = performance.now();
@@ -319,8 +322,7 @@ export class BladeGame {
     if (dt > 0) this.fpsAvg += 0.05 * (1 / Math.max(dt, 1e-3) - this.fpsAvg);
     this.autoQuality(now);
 
-    const audio = this.ctx.audio;
-    const st = audio.songTime();
+    const st = this.clock.time();
 
     if (!this.paused) {
       this.processPose(st);
@@ -331,7 +333,7 @@ export class BladeGame {
         this.wallTime += dt;
       }
       if (this.health <= 0 && !this.opts.noFail && !this.finished) this.finish(false);
-      if (!this.finished && st > this.song.buffer.duration + 0.4) this.finish(true);
+      if (!this.finished && st > this.clock.duration + 0.4) this.finish(true);
     }
 
     this.updateVisuals(dt, now, st);
@@ -373,7 +375,7 @@ export class BladeGame {
         continue;
       }
       this.latestBody = b;
-      const s = this.ctx.audio.songTimeAt(f.t);
+      const s = this.clock.timeAt(f.t);
       this.lastPoseSong = s;
       for (const h of [0, 1] as const) {
         const p = this.handPoint(b, h);
@@ -731,7 +733,7 @@ export class BladeGame {
     set('combo', String(this.combo), (v) => (this.hud.combo.textContent = v));
     set('mult', `×${this.mult.value}`, (v) => (this.hud.mult.textContent = v));
     set('ring', (276.5 * (1 - this.mult.fill)).toFixed(1), (v) => (this.hud.ring.style.strokeDashoffset = v));
-    const prog = Math.max(0, Math.min(1, st / this.song.buffer.duration));
+    const prog = Math.max(0, Math.min(1, st / Math.max(1, this.clock.duration)));
     set('prog', (prog * 100).toFixed(1), (v) => (this.hud.progress.style.width = `${v}%`));
     const hp = Math.max(0, Math.min(1, this.health));
     set('hp', (hp * 100).toFixed(0), (v) => {
@@ -756,7 +758,7 @@ export class BladeGame {
   private async pause(): Promise<void> {
     if (this.paused || this.finished) return;
     this.paused = true;
-    await this.ctx.audio.pause();
+    await this.clock.pause();
     this.hud.pauseMenu.classList.remove('hidden');
     this.ctx.cursor(true);
   }
@@ -765,7 +767,7 @@ export class BladeGame {
     if (act === 'resume') {
       this.hud.pauseMenu.classList.add('hidden');
       this.ctx.cursor(false);
-      await this.ctx.audio.resume();
+      await this.clock.resume();
       this.paused = false;
       this.lastPoseT = performance.now();
       this.prevHand = [null, null];
@@ -800,7 +802,7 @@ export class BladeGame {
     if (!cleared) {
       this.hud.center.textContent = 'Failed';
       this.hud.center.classList.add('show', 'fail');
-      this.ctx.audio.fadeMusic(0, 1.2);
+      this.clock.fadeOut(1.2);
     }
     setTimeout(
       () => {
@@ -815,7 +817,7 @@ export class BladeGame {
   private cleanup(): void {
     cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.resize);
-    this.ctx.audio.stopSong();
+    this.clock.stop();
     if (this.ctx.pose instanceof SimPose) this.ctx.pose.drive = () => ({ lWrist: { x: -0.75, y: -1.55 }, rWrist: { x: 0.75, y: -1.55 } });
     this.renderer.dispose();
     this.composer?.dispose();
@@ -830,7 +832,7 @@ export class BladeGame {
 
   /** Plays the map perfectly-ish: used for demo mode and automated tests. */
   private botDrive(tMs: number): SimParams {
-    const s = this.ctx.audio.songTimeAt(tMs);
+    const s = this.clock.timeAt(tMs);
     const rest: [V2, V2] = [
       { x: -0.34, y: 0.95 },
       { x: 0.34, y: 0.95 },
