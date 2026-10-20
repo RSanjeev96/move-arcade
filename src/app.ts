@@ -136,7 +136,8 @@ export class App {
   }
 
   private async startDemo(openGame: string | null, autoplay = true): Promise<void> {
-    await this.audio.unlock().catch(() => {});
+    // Without a tap (test URLs) the browser may never resume audio, so don't wait for it forever.
+    await Promise.race([this.audio.unlock().catch(() => {}), new Promise((r) => setTimeout(r, 800))]);
     this.pose?.stop();
     const sim = new SimPose();
     sim.drive = () => SIM_REST;
