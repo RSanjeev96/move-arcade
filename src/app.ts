@@ -304,7 +304,9 @@ export class App {
   }
 
   private showHome(): void {
-    const games = GAMES.map((g) => ({ ...g, live: g.ready || this.params.has('all') }));
+    // The preview build (VITE_ALL_GAMES) and ?all unlock games that are still being finished, marked Beta.
+    const all = this.params.has('all') || import.meta.env.VITE_ALL_GAMES === '1';
+    const games = GAMES.map((g) => ({ ...g, live: g.ready || all, tag: g.ready ? g.tag : `${g.tag} · Beta` }));
     const el = html(`
       <div class="screen home">
         ${this.topbar()}

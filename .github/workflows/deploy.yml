@@ -30,6 +30,14 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Build preview with every game, including ones still in progress (/preview/)
+        continue-on-error: true
+        run: |
+          git fetch --depth=1 origin wip/game-builds
+          git worktree add /tmp/wip FETCH_HEAD
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/wip/node_modules
+          cd /tmp/wip
+          BASE_PATH=/${{ github.event.repository.name }}/preview/ VITE_ALL_GAMES=1 npx vite build --outDir "$GITHUB_WORKSPACE/dist/preview"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
