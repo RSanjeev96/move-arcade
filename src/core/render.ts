@@ -36,7 +36,7 @@ export class Renderer3D {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = opts.exposure ?? 1;
     this.renderer.shadowMap.enabled = !!opts.shadows;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.level = quality === 'auto' ? 'high' : quality;
     this.apply(this.level);
     window.addEventListener('resize', this.resize);

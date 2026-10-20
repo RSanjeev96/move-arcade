@@ -10,7 +10,7 @@ export interface GameEntry extends GameInfo {
 
 export const GAMES: GameEntry[] = [
   { id: 'blade', name: 'Blade Beat', desc: 'Slice blocks to the music', tag: 'Rhythm', cls: 't-blade', icon: ICONS.blade, ready: true, load: () => import('./blade') },
-  { id: 'racer', name: 'Grand Prix', desc: 'F1 steering or MotoGP lean', tag: 'Racing', cls: 't-racer', icon: ICONS.wheel, ready: false, load: () => import('./racer') },
+  { id: 'racer', name: 'Grand Prix', desc: 'F1 steering or MotoGP lean', tag: 'Racing', cls: 't-racer', icon: ICONS.wheel, ready: true, load: () => import('./racer') },
   { id: 'goalie', name: 'Goalkeeper', desc: 'Dive and save penalties', tag: 'Sports', cls: 't-goalie', icon: ICONS.glove, ready: false, load: () => import('./goalie') },
   { id: 'bat', name: 'Big Hitter', desc: 'Cricket and baseball batting', tag: 'Sports', cls: 't-bat', icon: ICONS.bat, ready: false, load: () => import('./bat') },
   { id: 'tennis', name: 'Centre Court', desc: 'Swing and rally', tag: 'Sports', cls: 't-tennis', icon: ICONS.racket, ready: false, load: () => import('./tennis') },
