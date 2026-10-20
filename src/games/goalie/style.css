@@ -1,0 +1,910 @@
+/* Goalkeeper — all selectors scoped under .goalie */
+.goalie {
+  --gk-green: #19e68c;
+  --gk-red: #ff3b4e;
+  --gk-gold: #ffd23f;
+  --gk-ink: #070b14;
+  --gk-panel: rgba(8, 12, 24, 0.72);
+  --gk-font: 'Outfit', system-ui, sans-serif;
+  background: radial-gradient(1200px 700px at 50% 120%, #0d3b22 0%, #04140c 45%, #03060c 100%);
+  font-family: var(--gk-font);
+}
+.goalie > canvas.gl {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.goalie.ready > canvas.gl {
+  opacity: 1;
+}
+.goalie .gk-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+}
+.goalie .gk-ui:empty {
+  pointer-events: none;
+}
+
+/* ---- menu ---- */
+.goalie .gk-menu {
+  background: linear-gradient(90deg, rgba(3, 6, 14, 0.82) 0%, rgba(3, 6, 14, 0.45) 55%, rgba(3, 6, 14, 0.7) 100%);
+  animation: gk-fade 0.4s ease;
+}
+.goalie .gk-menu .glass {
+  background: rgba(8, 14, 28, 0.62);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.goalie .gk-menu-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.goalie .gk-menu-title small {
+  font-size: clamp(11px, 1vw, 15px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gk-green);
+  font-weight: 800;
+}
+.goalie .gk-menu-title b {
+  font: 900 clamp(34px, 4.6vw, 76px) / 0.95 var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  transform: skewX(-7deg);
+  transform-origin: left;
+  background: linear-gradient(180deg, #fff 30%, #b8ffd9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 22px rgba(25, 230, 140, 0.35));
+}
+.goalie .gk-vs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(13px, 1.25vw, 19px);
+  color: #dfe7f5;
+  font-weight: 600;
+}
+.goalie .gk-vs em {
+  font-style: normal;
+  color: #8fa0bf;
+  font-weight: 800;
+  margin: 0 4px;
+}
+.goalie .gk-vs i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--c);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+.goalie .gk-howgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.goalie .gk-how {
+  display: grid;
+  grid-template-columns: clamp(38px, 3.8vw, 58px) 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 12px;
+  align-items: start;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px;
+}
+.goalie .gk-how svg {
+  grid-row: span 2;
+  width: 100%;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.goalie .gk-how svg .accent,
+.goalie .gk-how svg .ball {
+  stroke: var(--gk-green);
+}
+.goalie .gk-how b {
+  font-size: clamp(14px, 1.35vw, 21px);
+  font-weight: 800;
+}
+.goalie .gk-how span {
+  color: #a9b6cf;
+  font-size: clamp(12px, 1.05vw, 16px);
+  line-height: 1.3;
+}
+.goalie .gk-tip {
+  margin: 4px 0 0;
+  color: #a9b6cf;
+  font-size: clamp(12px, 1.1vw, 17px);
+}
+.goalie .gk-menu .btn.primary,
+.goalie .gk-play {
+  background: linear-gradient(135deg, #19e68c, #0aa3ff);
+  color: #04130b;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow:
+    0 12px 34px rgba(25, 230, 140, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.goalie .gk-menu .btn.on {
+  background: #fff;
+  color: #06121e;
+}
+.goalie .gk-menu .best b {
+  color: var(--gk-gold);
+}
+.goalie .gk-loading {
+  background: rgba(3, 6, 14, 0.75);
+}
+
+/* ---- HUD ---- */
+.goalie .gk-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  color: #fff;
+  font-family: var(--gk-font);
+}
+.goalie .gk-hud > * {
+  position: absolute;
+}
+.goalie .gk-bug {
+  top: clamp(12px, 2.4vh, 28px);
+  left: clamp(14px, 2vw, 34px);
+  min-width: clamp(260px, 25vw, 420px);
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.45));
+}
+.goalie .mode-rapid .gk-bug,
+.goalie .mode-rapid .gk-keeper-stat {
+  display: none;
+}
+.goalie .mode-shootout .gk-rapid,
+.goalie .mode-shootout .gk-strip {
+  display: none;
+}
+.goalie .gk-bug-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  background: linear-gradient(180deg, #121a2e, #0a0f1d);
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: none;
+}
+.goalie .gk-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  font: 900 clamp(20px, 2.2vw, 36px) var(--gk-font);
+  letter-spacing: 0.04em;
+}
+.goalie .gk-team.away {
+  justify-content: flex-end;
+}
+.goalie .gk-team i {
+  width: clamp(10px, 0.9vw, 14px);
+  align-self: stretch;
+  margin: -8px 0;
+  background: linear-gradient(180deg, var(--tc) 0 60%, var(--tc2) 60% 100%);
+}
+.goalie .gk-team.home i {
+  margin-left: -14px;
+}
+.goalie .gk-team.away i {
+  margin-right: -14px;
+}
+.goalie .gk-scores {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 clamp(10px, 1.2vw, 18px);
+  background: #fff;
+  color: #0a1020;
+  font: 900 clamp(26px, 3vw, 50px) / 1 var(--gk-font);
+  font-variant-numeric: tabular-nums;
+}
+.goalie .gk-scores em {
+  font-style: normal;
+  opacity: 0.4;
+}
+.goalie .gk-bug-sub {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 12px;
+  background: linear-gradient(90deg, #19e68c, #0aa3ff);
+  color: #04130b;
+  font: 900 clamp(11px, 1vw, 15px) var(--gk-font);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.goalie .gk-pens {
+  background: rgba(8, 12, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 8px 12px;
+  display: grid;
+  gap: 6px;
+}
+.goalie .gk-row {
+  display: flex;
+  gap: clamp(6px, 0.6vw, 10px);
+}
+.goalie .gk-row.away {
+  justify-content: flex-start;
+}
+.goalie .gk-row i {
+  width: clamp(16px, 1.5vw, 24px);
+  height: clamp(16px, 1.5vw, 24px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-sizing: border-box;
+  position: relative;
+}
+.goalie .gk-row i.in {
+  background: var(--gk-green);
+  border-color: var(--gk-green);
+  box-shadow: 0 0 10px rgba(25, 230, 140, 0.7);
+}
+.goalie .gk-row i.out {
+  background: var(--gk-red);
+  border-color: var(--gk-red);
+}
+.goalie .gk-row i.out::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background:
+    linear-gradient(45deg, transparent 42%, #fff 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, #fff 42% 58%, transparent 58%);
+}
+.goalie .gk-row i.now {
+  border-color: #fff;
+  animation: gk-blink 0.9s ease-in-out infinite;
+}
+.goalie .gk-keeper-stat {
+  top: clamp(12px, 2.4vh, 28px);
+  right: clamp(84px, 8vw, 120px);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: var(--gk-panel);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 8px 16px;
+}
+.goalie .gk-keeper-stat b {
+  font: 900 clamp(26px, 3vw, 48px) / 1 var(--gk-font);
+  color: var(--gk-green);
+}
+.goalie .gk-keeper-stat span {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: clamp(11px, 1vw, 15px);
+}
+.goalie .gk-keeper-stat em {
+  font-style: normal;
+  color: #a9b6cf;
+  font-size: clamp(11px, 1vw, 15px);
+}
+
+.goalie .gk-rapid {
+  top: clamp(12px, 2.4vh, 28px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(8px, 1vw, 16px);
+  align-items: stretch;
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.45));
+}
+.goalie .gk-rapid > div {
+  background: var(--gk-panel);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 6px clamp(12px, 1.4vw, 22px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: clamp(80px, 8vw, 130px);
+}
+.goalie .gk-rapid b {
+  font: 900 clamp(28px, 3.4vw, 56px) / 1.05 var(--gk-font);
+  font-variant-numeric: tabular-nums;
+}
+.goalie .gk-rapid span {
+  font-size: clamp(10px, 0.95vw, 14px);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a9b6cf;
+  font-weight: 800;
+}
+.goalie .gk-timer {
+  background: #fff !important;
+}
+.goalie .gk-timer b,
+.goalie .gk-timer span {
+  color: #0a1020;
+}
+.goalie .gk-timer.low {
+  background: var(--gk-red) !important;
+  animation: gk-pulse 0.5s ease-in-out infinite alternate;
+}
+.goalie .gk-timer.low b,
+.goalie .gk-timer.low span {
+  color: #fff;
+}
+.goalie .gk-saves b {
+  color: var(--gk-green);
+}
+.goalie .gk-combo.hot {
+  background: linear-gradient(135deg, rgba(255, 130, 30, 0.85), rgba(255, 50, 80, 0.85)) !important;
+}
+.goalie .gk-combo.hot span {
+  color: #fff;
+}
+.goalie .gk-strip {
+  bottom: clamp(16px, 3vh, 36px);
+  left: clamp(14px, 2vw, 34px);
+  display: flex;
+  gap: 6px;
+  background: var(--gk-panel);
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  min-height: 20px;
+}
+.goalie .gk-strip:empty {
+  display: none;
+}
+.goalie .gk-strip i {
+  width: clamp(14px, 1.3vw, 20px);
+  height: clamp(14px, 1.3vw, 20px);
+  border-radius: 50%;
+}
+.goalie .gk-strip i.s {
+  background: var(--gk-green);
+  box-shadow: 0 0 8px rgba(25, 230, 140, 0.7);
+}
+.goalie .gk-strip i.g {
+  background: var(--gk-red);
+}
+.goalie .gk-strip i.m {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Banners */
+.goalie .gk-banner {
+  left: 0;
+  right: 0;
+  top: 30%;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+}
+.goalie .gk-banner-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: skewX(-8deg);
+}
+.goalie .gk-banner b {
+  font: 900 clamp(56px, 9.5vw, 170px) / 0.95 var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  padding: 0.08em 0.35em 0.12em;
+  color: #fff;
+  -webkit-text-stroke: 0;
+  text-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+.goalie .gk-banner span {
+  margin-top: 6px;
+  font: 800 clamp(16px, 1.9vw, 30px) var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(5, 8, 16, 0.78);
+  padding: 4px 18px;
+  border-radius: 6px;
+}
+.goalie .gk-banner span:empty {
+  display: none;
+}
+.goalie .gk-banner.show {
+  animation: gk-banner 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+.goalie .gk-banner.tone-save b {
+  background: linear-gradient(180deg, #2cf59c, #07b86a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 0 rgba(0, 40, 20, 0.6)) drop-shadow(0 0 30px rgba(25, 230, 140, 0.55));
+  text-shadow: none;
+}
+.goalie .gk-banner.tone-great b {
+  background: linear-gradient(180deg, #fff6c2, #ffd23f 50%, #ff9a1a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 7px 0 rgba(80, 30, 0, 0.6)) drop-shadow(0 0 44px rgba(255, 190, 40, 0.75));
+  text-shadow: none;
+}
+.goalie .gk-banner.tone-goal b,
+.goalie .gk-banner.tone-lose b {
+  background: linear-gradient(180deg, #ff7a86, #e0182c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 0 rgba(60, 0, 8, 0.6)) drop-shadow(0 0 30px rgba(255, 40, 60, 0.5));
+  text-shadow: none;
+}
+.goalie .gk-banner.tone-win b {
+  background: linear-gradient(180deg, #ffffff, #8ff7ff 50%, #19e68c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 0 rgba(0, 30, 40, 0.6)) drop-shadow(0 0 40px rgba(60, 255, 200, 0.6));
+  text-shadow: none;
+}
+.goalie .gk-banner.tone-miss b {
+  color: #f3f6ff;
+}
+
+/* Prompts */
+.goalie .gk-prompt {
+  left: 50%;
+  bottom: clamp(18px, 6vh, 64px);
+  transform: translate(-50%, 20px);
+  display: flex;
+  gap: 12px;
+  opacity: 0;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.goalie .gk-prompt.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.goalie .gk-tut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gk-panel);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 12px 20px;
+  backdrop-filter: blur(6px);
+}
+.goalie .gk-tut b {
+  font: 800 clamp(16px, 1.8vw, 28px) var(--gk-font);
+  white-space: nowrap;
+}
+.goalie .gk-tut span {
+  color: #b6c2da;
+  font-size: clamp(13px, 1.3vw, 20px);
+  white-space: nowrap;
+}
+.goalie .gk-tut.small {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 16px;
+}
+.goalie .gk-tut.good {
+  border-color: rgba(25, 230, 140, 0.7);
+  flex-direction: column;
+  gap: 2px;
+}
+.goalie .gk-tut.good b {
+  color: var(--gk-green);
+}
+.goalie .gk-tut i {
+  width: clamp(28px, 2.6vw, 42px);
+  height: clamp(28px, 2.6vw, 42px);
+  border-radius: 50%;
+  background: var(--gk-green) center/62% no-repeat;
+  flex: none;
+}
+.goalie .gk-tut i.ic-hands {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304130b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8'/%3E%3Cpath d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4L2.4 16a2 2 0 0 1 2.8-2.8L7 15'/%3E%3C/svg%3E");
+}
+.goalie .gk-tut i.ic-lean {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304130b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='4.5' r='2'/%3E%3Cpath d='M12 7v7M8 10l4-2 4 2M9 21l3-7 3 7M2 13h4M18 13h4'/%3E%3C/svg%3E");
+}
+.goalie .gk-tut i.ic-point {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304130b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='10'/%3E%3Ccircle cx='17' cy='7' r='1.6'/%3E%3Cpath d='M12 21l4-10'/%3E%3C/svg%3E");
+}
+.goalie .gk-tut i.ic-kick {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304130b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='4' r='2'/%3E%3Cpath d='M9 6v6l-3 9M9 12l6 3 3-1'/%3E%3Ccircle cx='20' cy='18' r='2'/%3E%3C/svg%3E");
+}
+
+/* Aim countdown for your penalty */
+.goalie .gk-aim {
+  right: clamp(14px, 2vw, 34px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(110px, 11vw, 170px);
+  aspect-ratio: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.goalie .gk-aim.show {
+  display: flex;
+}
+.goalie .gk-aim svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.goalie .gk-aim .bg {
+  fill: rgba(8, 12, 24, 0.6);
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 7;
+}
+.goalie .gk-aim .fg {
+  fill: none;
+  stroke: var(--gk-green);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 276.5;
+  stroke-dashoffset: 276.5;
+}
+.goalie .gk-aim span {
+  position: relative;
+  font: 800 clamp(12px, 1.2vw, 17px) var(--gk-font);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 14px;
+}
+
+.goalie .gk-warn {
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 59, 78, 0.92);
+  padding: 14px 26px;
+  border-radius: 14px;
+  font: 800 clamp(18px, 2vw, 32px) var(--gk-font);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.goalie .gk-warn.show {
+  opacity: 1;
+}
+.goalie .gk-cam {
+  bottom: clamp(16px, 3vh, 36px);
+  right: clamp(14px, 2vw, 34px);
+  width: clamp(150px, 16vw, 270px);
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.goalie .gk-pause {
+  pointer-events: auto;
+  top: clamp(12px, 2.4vh, 28px);
+  right: clamp(14px, 2vw, 34px);
+  width: clamp(48px, 4.4vw, 64px);
+  height: clamp(48px, 4.4vw, 64px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(8, 12, 24, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.goalie .gk-pause i {
+  width: 6px;
+  height: 40%;
+  border-radius: 2px;
+  background: #fff;
+}
+.goalie .gk-hint {
+  right: clamp(14px, 2vw, 34px);
+  bottom: calc(clamp(16px, 3vh, 36px) + clamp(84px, 9vw, 152px) + 8px);
+  font-size: clamp(10px, 0.9vw, 13px);
+  color: rgba(255, 255, 255, 0.5);
+  text-align: right;
+  width: clamp(150px, 16vw, 270px);
+}
+.goalie .gk-vignette {
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, var(--vc, #000) 120%);
+  transition: opacity 0.3s;
+}
+
+/* Broadcast stinger between kicks */
+.goalie .gk-stinger {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.goalie .gk-stinger i {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  width: 70%;
+  left: -90%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, #0aa3ff, #19e68c);
+}
+.goalie .gk-stinger i + i {
+  background: #0b1222;
+  width: 60%;
+}
+.goalie .gk-stinger b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(60px, 7vw, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #111 0 17%, transparent 18%),
+    radial-gradient(circle at 50% 8%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 12% 40%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 88% 40%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 28% 88%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 72% 88%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 35% 30%, #fff, #cfd6e0 70%, #8d97a8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+}
+.goalie .gk-stinger.go i {
+  animation: gk-sting 0.72s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+.goalie .gk-stinger.go i + i {
+  animation-delay: 0.05s;
+}
+.goalie .gk-stinger.go b {
+  animation: gk-sting-ball 0.72s ease forwards;
+}
+
+/* Title card */
+.goalie .gk-title {
+  left: 0;
+  right: 0;
+  top: 36%;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+}
+.goalie .gk-title-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 60px 22px;
+  background: linear-gradient(90deg, transparent, rgba(6, 10, 22, 0.85) 18%, rgba(6, 10, 22, 0.85) 82%, transparent);
+}
+.goalie .gk-title small {
+  font: 900 clamp(14px, 1.5vw, 24px) var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  color: var(--gk-green);
+}
+.goalie .gk-title b {
+  font: 900 clamp(48px, 7vw, 120px) / 1 var(--gk-font);
+  text-transform: uppercase;
+  transform: skewX(-8deg);
+  letter-spacing: 0.02em;
+}
+.goalie .gk-title span {
+  font: 600 clamp(14px, 1.6vw, 24px) var(--gk-font);
+  color: #b6c2da;
+}
+.goalie .gk-title.show {
+  animation: gk-title 2.8s ease forwards;
+}
+
+/* Pause menu over the stadium */
+.goalie .pause-menu {
+  z-index: 8;
+  background: rgba(3, 6, 14, 0.72);
+}
+
+/* Results */
+.goalie .gk-results {
+  background:
+    linear-gradient(180deg, rgba(3, 6, 14, 0.55), rgba(3, 6, 14, 0.85)),
+    var(--shot, none) center / cover no-repeat,
+    #04080f;
+}
+.goalie .gk-results .orbs {
+  display: none;
+}
+.goalie .gk-results .res-card {
+  background: rgba(8, 14, 28, 0.72);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.goalie .gk-results .btn.primary {
+  background: linear-gradient(135deg, #19e68c, #0aa3ff);
+  color: #04130b;
+  font-weight: 900;
+}
+.goalie .gk-res-pens {
+  position: absolute;
+  top: clamp(18px, 2.6vw, 40px);
+  right: clamp(18px, 2.6vw, 40px);
+  display: grid;
+  gap: 8px;
+}
+.goalie .gk-res-pens div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.goalie .gk-res-pens b {
+  width: 3.2em;
+  font-weight: 900;
+  border-left: 5px solid var(--c);
+  padding-left: 6px;
+}
+.goalie .gk-res-pens i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+.goalie .gk-res-pens i.in {
+  background: var(--gk-green);
+}
+.goalie .gk-res-pens i.out {
+  background: var(--gk-red);
+}
+
+.goalie .pop {
+  animation: gk-pop 0.35s ease;
+}
+
+@keyframes gk-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes gk-pop {
+  40% {
+    transform: scale(1.25);
+  }
+}
+@keyframes gk-blink {
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.35);
+  }
+}
+@keyframes gk-pulse {
+  to {
+    transform: scale(1.05);
+  }
+}
+@keyframes gk-banner {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes gk-sting {
+  0% {
+    left: -90%;
+  }
+  45%,
+  55% {
+    left: 15%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+@keyframes gk-sting-ball {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0) rotate(0);
+  }
+  45%,
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(200deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(360deg);
+  }
+}
+@keyframes gk-title {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+}
+
+/* Menu panels hug their content so the stadium shows below. */
+.goalie .gk-menu .menu-body {
+  align-items: start;
+  grid-template-columns: 1.25fr 0.85fr;
+}
+.goalie .gk-menu .menu-body > * {
+  max-height: 100%;
+}
+
+/* Lower third: the player stepping up */
+.goalie .gk-third {
+  left: clamp(14px, 2vw, 34px);
+  bottom: calc(clamp(18px, 6vh, 64px) + clamp(64px, 8vh, 96px));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(8, 12, 24, 0.92), rgba(8, 12, 24, 0.7));
+  border-left: 6px solid var(--tc, #fff);
+  padding: 10px 22px 10px 14px;
+  border-radius: 4px 14px 14px 4px;
+  opacity: 0;
+  transform: translateX(-30px);
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
+}
+.goalie .gk-third.show {
+  opacity: 1;
+  transform: none;
+}
+.goalie .gk-third i {
+  grid-row: span 2;
+  width: clamp(30px, 2.8vw, 44px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tc, #fff);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+}
+.goalie .gk-third b {
+  font: 900 clamp(18px, 2vw, 32px) / 1 var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.goalie .gk-third span {
+  font: 700 clamp(11px, 1.05vw, 16px) var(--gk-font);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a9b6cf;
+}
