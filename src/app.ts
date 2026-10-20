@@ -66,6 +66,14 @@ export class App {
     }
   }
 
+  /** Full screen needs a fresh tap; after the camera prompt, go full screen on the next touch anywhere. */
+  private fullscreenOnNextTap(): void {
+    if (document.fullscreenElement || matchMedia('(display-mode: fullscreen)').matches) return;
+    const go = () => void this.goFullscreen();
+    document.addEventListener('pointerdown', go, { once: true, capture: true });
+    void this.goFullscreen();
+  }
+
   private async goFullscreen(): Promise<void> {
     try {
       if (!document.fullscreenElement) await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
@@ -97,8 +105,9 @@ export class App {
     el.querySelector('#go')!.addEventListener('click', async () => {
       status.classList.remove('err');
       await this.audio.unlock();
-      void this.goFullscreen();
-      void this.keepAwake();
+      // Ask for the camera BEFORE going full screen: Android blocks permission prompts while Chrome's
+      // "to exit full screen…" notice (or any other overlay) is showing.
+      if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
       try {
         this.pose?.stop();
         this.pose = await CameraPose.create({
@@ -107,12 +116,17 @@ export class App {
           onStatus: (s) => (status.textContent = s),
         });
         this.demo = false;
+        void this.keepAwake();
+        this.fullscreenOnNextTap();
         this.showCalibrate();
       } catch (e) {
+        const name = e instanceof DOMException ? e.name : '';
         const msg =
-          e instanceof DOMException && e.name === 'NotAllowedError'
-            ? 'Camera permission was blocked. Allow the camera for this site in Chrome settings, then tap Start again.'
-            : `Could not start: ${(e as Error).message}`;
+          name === 'NotAllowedError'
+            ? 'The camera was blocked. Close any floating bubbles or screen filters (chat heads, screen recorder, blue-light filter), then tap the icon left of the address bar → Permissions → Camera → Allow, and tap Start again.'
+            : name === 'NotReadableError'
+              ? 'Another app is using the camera. Close it and tap Start again.'
+              : `Could not start: ${(e as Error).message}`;
         status.textContent = msg;
         status.classList.add('err');
       }
