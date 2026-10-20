@@ -1,0 +1,746 @@
+/* Sky Quest — every selector is scoped under a quest-* class. */
+
+/* ---- menu ---------------------------------------------------------------------------------------------------- */
+.quest-menu {
+  background:
+    radial-gradient(900px 500px at 80% -10%, rgba(255, 236, 160, 0.35), transparent 60%),
+    radial-gradient(1000px 600px at 10% 110%, rgba(80, 230, 200, 0.28), transparent 60%),
+    linear-gradient(180deg, #2a6fd6 0%, #4f9ff0 45%, #8fd0ff 100%);
+}
+.quest-menu .top-title {
+  font-family: var(--display);
+  letter-spacing: 0.06em;
+  text-shadow: 0 3px 0 rgba(0, 40, 90, 0.35);
+}
+.quest-menu .menu-body {
+  grid-template-columns: 1.55fr 1fr;
+}
+.quest-menu .q-left {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.4vw, 20px);
+  min-height: 0;
+  padding: 8px 4px 16px;
+}
+.quest-menu .q-levels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(10px, 1.2vw, 18px);
+}
+.quest-menu .q-lv {
+  position: relative;
+  border: 3px solid rgba(255, 255, 255, 0.55);
+  border-radius: 22px;
+  padding: 0;
+  overflow: hidden;
+  background: #1d3c7a;
+  color: #fff;
+  font-family: var(--ui);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 0 rgba(10, 30, 80, 0.35), 0 18px 40px rgba(0, 20, 60, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.2s, border-color 0.2s;
+}
+.quest-menu .q-lv .q-art {
+  width: 100%;
+  aspect-ratio: 300 / 160;
+  display: block;
+}
+.quest-menu .q-lv.on {
+  border-color: #ffe066;
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 4px rgba(255, 224, 102, 0.5), 0 14px 0 rgba(10, 30, 80, 0.35), 0 24px 50px rgba(0, 20, 60, 0.45);
+}
+.quest-menu .q-lv.locked {
+  filter: saturate(0.25) brightness(0.7);
+  cursor: default;
+}
+.quest-menu .q-lv-info {
+  padding: clamp(8px, 1vw, 14px) clamp(10px, 1.1vw, 16px) clamp(10px, 1.2vw, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: linear-gradient(180deg, rgba(20, 40, 100, 0.92), rgba(12, 26, 70, 0.96));
+  flex: 1;
+}
+.quest-menu .q-lv-info small {
+  font: 700 clamp(11px, 0.95vw, 14px) var(--ui);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9fd8ff;
+}
+.quest-menu .q-lv-info b {
+  font: 800 clamp(16px, 1.65vw, 26px) var(--ui);
+}
+.quest-menu .q-lv-info em {
+  font-style: normal;
+  font-size: clamp(11px, 0.95vw, 15px);
+  color: #cfe3ff;
+}
+.quest-menu .q-lv-stars i,
+.quest-menu .q-sel-stars i {
+  font-style: normal;
+  font-size: clamp(16px, 1.6vw, 26px);
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.08em;
+}
+.quest-menu .q-lv-stars i.on,
+.quest-menu .q-sel-stars i.on {
+  color: #ffd34d;
+  text-shadow: 0 0 12px rgba(255, 211, 77, 0.8);
+}
+.quest-menu .how,
+.quest-menu .side {
+  background: rgba(12, 30, 80, 0.55);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.quest-menu .q-how {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+.quest-menu .q-how li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #d8e8ff;
+  margin: 0;
+}
+.quest-menu .q-how li span {
+  flex: none;
+  width: clamp(30px, 2.8vw, 42px);
+  height: clamp(30px, 2.8vw, 42px);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: clamp(16px, 1.6vw, 24px);
+  background: linear-gradient(180deg, #ffe066, #ffb43d);
+  color: #4a2a00;
+  box-shadow: 0 3px 0 #c97f12;
+}
+.quest-menu .q-how li b {
+  color: #fff;
+}
+.quest-menu .q-diff-note {
+  color: #cfe3ff;
+  font-size: clamp(13px, 1.15vw, 17px);
+  min-height: 2.6em;
+}
+.quest-menu .q-sel {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.quest-menu .q-sel-name {
+  font: 800 clamp(16px, 1.6vw, 24px) var(--ui);
+}
+.quest-menu .q-sel-best {
+  color: #cfe3ff;
+  font-size: clamp(12px, 1.05vw, 16px);
+}
+.quest-menu .q-sel-best b {
+  color: #ffe066;
+}
+.quest-menu .btn.primary {
+  background: linear-gradient(180deg, #ffd84d, #ff9f1c);
+  color: #3a1d00;
+  box-shadow: 0 6px 0 #c06b00, 0 14px 30px rgba(255, 160, 30, 0.45);
+  font-weight: 800;
+}
+.quest-menu .seg .btn.on {
+  background: #ffe066;
+  color: #3a1d00;
+}
+
+/* ---- in game ------------------------------------------------------------------------------------------------- */
+.quest-host {
+  padding: 0;
+  background: #8fd0ff;
+}
+.quest-game .q-vig,
+.quest-game .q-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
+}
+.quest-game .q-hurt {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(255, 40, 60, 0.85) 100%);
+}
+.quest-game .q-shield {
+  background: radial-gradient(ellipse at center, transparent 62%, rgba(90, 210, 255, 0.55) 92%, rgba(200, 245, 255, 0.85) 100%);
+  transition: opacity 0.3s;
+}
+.quest-game .q-fade {
+  background: #fff;
+  transition: opacity 0.35s;
+  z-index: 4;
+}
+.quest-game .q-fade.on {
+  opacity: 1;
+}
+.quest-game .q-hud {
+  font-family: var(--ui);
+  color: #fff;
+}
+.quest-game .q-hud .tl,
+.quest-game .q-hud .tr,
+.quest-game .q-hud .tc {
+  top: clamp(10px, 2.2vh, 26px);
+}
+
+/* Hearts, coins, gems */
+.quest-game .q-tl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.quest-game .q-hearts {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+.quest-game .q-hearts i {
+  width: clamp(28px, 2.8vw, 44px);
+  height: clamp(26px, 2.6vw, 40px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 30'%3E%3Cpath d='M16 29 C 4 20 0 13 2 7 C 4 1 12 0 16 6 C 20 0 28 1 30 7 C 32 13 28 20 16 29Z' fill='%23ff4f6d' stroke='%23fff' stroke-width='2.5'/%3E%3Cellipse cx='9' cy='9' rx='3' ry='2' fill='%23fff' opacity='.7'/%3E%3C/svg%3E") center/contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+  transition: transform 0.25s, opacity 0.25s, filter 0.25s;
+}
+.quest-game .q-hearts i.off {
+  opacity: 0.35;
+  filter: grayscale(1) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+  transform: scale(0.82);
+}
+.quest-game .q-counters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.quest-game .q-coins {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+.quest-game .q-coins b {
+  font: 900 clamp(24px, 2.6vw, 42px) / 1 var(--num);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  min-width: 2ch;
+}
+.quest-game .q-coins.bump .q-coin-ic {
+  animation: q-bump 0.25s ease;
+}
+.quest-game .q-coin-ic {
+  width: clamp(26px, 2.6vw, 40px);
+  height: clamp(26px, 2.6vw, 40px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff7c2 0 18%, #ffd34d 19% 55%, #e09a00 56% 100%);
+  box-shadow: inset 0 0 0 3px #b87a00, 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+@keyframes q-bump {
+  50% {
+    transform: scale(1.35) rotate(-12deg);
+  }
+}
+.quest-game .q-gems {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+.quest-game .q-gems i {
+  width: clamp(18px, 1.8vw, 28px);
+  height: clamp(18px, 1.8vw, 28px);
+  transform: rotate(45deg) scale(0.75);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+  transition: background 0.3s, transform 0.3s;
+}
+.quest-game .q-gems i.on {
+  background: linear-gradient(135deg, #b8e4ff, #3f8cff);
+  box-shadow: 0 0 12px rgba(120, 190, 255, 0.9), inset 0 0 0 2px #fff;
+  transform: rotate(45deg) scale(0.85);
+}
+.quest-game .q-power {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.55);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+  animation: q-in 0.3s ease;
+}
+.quest-game .q-power-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 15%, var(--pc, #ffd84d) 16% 100%);
+  box-shadow: 0 0 14px var(--pc, #ffd84d);
+}
+.quest-game .q-power[data-kind='triple'] {
+  --pc: #ffcf3a;
+}
+.quest-game .q-power[data-kind='shield'] {
+  --pc: #5fd0ff;
+}
+.quest-game .q-power[data-kind='magnet'] {
+  --pc: #ff6b8b;
+}
+.quest-game .q-power b {
+  font: 800 clamp(13px, 1.25vw, 19px) var(--ui);
+  display: block;
+}
+.quest-game .q-power i {
+  display: block;
+  width: clamp(90px, 9vw, 140px);
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  margin-top: 4px;
+}
+.quest-game .q-power u {
+  display: block;
+  height: 100%;
+  background: var(--pc, #ffd84d);
+  transition: width 0.25s linear;
+}
+
+/* Level progress */
+.quest-game .q-tc {
+  width: min(40vw, 560px);
+}
+.quest-game .q-lname {
+  font: 800 clamp(13px, 1.25vw, 19px) var(--ui);
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  margin-bottom: 8px;
+}
+.quest-game .q-track {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+.quest-game .q-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7cff6b, #ffe066);
+}
+.quest-game .q-cp {
+  position: absolute;
+  top: -5px;
+  width: 4px;
+  height: 24px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
+}
+.quest-game .q-me {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #5fd0ff 60%, #1f7fd6);
+  box-shadow: 0 0 0 3px #fff, 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+.quest-game .q-goal {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-52%);
+  font-size: 28px;
+  color: #ffd34d;
+  text-shadow: 0 0 10px rgba(255, 211, 77, 0.9), 0 2px 0 #a86a00;
+}
+
+/* Time + pause */
+.quest-game .q-tr {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.quest-game .q-time {
+  font: 900 clamp(22px, 2.3vw, 36px) var(--num);
+  font-variant-numeric: tabular-nums;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+.quest-game .q-pause {
+  pointer-events: auto;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  background: rgba(10, 30, 70, 0.5);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Prompts, banners, countdown */
+.quest-game .q-prompt {
+  left: 50%;
+  bottom: clamp(70px, 15vh, 160px);
+  transform: translate(-50%, 20px) scale(0.85);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 26px 10px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff, #e8f3ff);
+  color: #12305e;
+  box-shadow: 0 6px 0 rgba(10, 40, 90, 0.35), 0 16px 40px rgba(0, 20, 60, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
+  white-space: nowrap;
+}
+.quest-game .q-prompt.show {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  animation: q-nudge 1.6s ease-in-out 0.4s infinite;
+}
+@keyframes q-nudge {
+  50% {
+    transform: translate(-50%, -6px) scale(1.03);
+  }
+}
+.quest-game .q-prompt b {
+  font: 900 clamp(22px, 2.6vw, 42px) var(--ui);
+}
+.quest-game .q-pi {
+  width: clamp(44px, 4.4vw, 68px);
+  height: clamp(44px, 4.4vw, 68px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: clamp(22px, 2.4vw, 38px);
+  color: #fff;
+  background: var(--ic, #3fbf6f);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+}
+.quest-game .q-prompt[data-icon='hop'] {
+  --ic: #2fcf7a;
+}
+.quest-game .q-prompt[data-icon='big'],
+.quest-game .q-prompt[data-icon='spring'] {
+  --ic: #ff9f1c;
+}
+.quest-game .q-prompt[data-icon='punch'],
+.quest-game .q-prompt[data-icon='block'] {
+  --ic: #2fa8ff;
+}
+.quest-game .q-prompt[data-icon='duck'] {
+  --ic: #ff4f9b;
+}
+.quest-game .q-prompt[data-icon='lean'],
+.quest-game .q-prompt[data-icon='run'] {
+  --ic: #8a5bff;
+}
+.quest-game .q-banner {
+  left: 50%;
+  top: 24%;
+  transform: translate(-50%, -50%) scale(0.6);
+  font: 900 clamp(34px, 4.6vw, 76px) var(--ui);
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow:
+    2px 2px 0 #1a3a8a,
+    -2px 2px 0 #1a3a8a,
+    2px -2px 0 #1a3a8a,
+    -2px -2px 0 #1a3a8a,
+    0 6px 0 rgba(20, 40, 100, 0.5),
+    0 0 30px rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.35s cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+.quest-game .q-banner.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.quest-game .q-banner.cp,
+.quest-game .q-banner.clear {
+  color: #ffe066;
+}
+.quest-game .q-banner.gem {
+  color: #9fd8ff;
+}
+.quest-game .q-banner.power {
+  color: #ffd84d;
+}
+.quest-game .q-banner.jump {
+  color: #b8fff0;
+  font-size: clamp(26px, 3.2vw, 54px);
+  top: 30%;
+}
+.quest-game .q-count {
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  font: 900 clamp(80px, 14vw, 220px) var(--ui);
+  color: #fff;
+  text-shadow:
+    0 0 0 #1a3a8a,
+    3px 3px 0 #1a3a8a,
+    -3px 3px 0 #1a3a8a,
+    3px -3px 0 #1a3a8a,
+    -3px -3px 0 #1a3a8a,
+    0 10px 0 rgba(20, 40, 100, 0.45),
+    0 0 40px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+.quest-game .q-count.pop {
+  animation: q-pop 0.55s cubic-bezier(0.2, 1.7, 0.4, 1);
+}
+.quest-game .q-count.over {
+  font-size: clamp(48px, 7vw, 110px);
+  color: #ff8fa3;
+  white-space: nowrap;
+}
+@keyframes q-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.quest-game .q-titlecard {
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%) scale(0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 46px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(20, 50, 120, 0.82), rgba(12, 30, 80, 0.88));
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 24px 60px rgba(0, 20, 60, 0.45);
+  opacity: 0;
+  transition: opacity 0.4s, transform 0.5s;
+}
+.quest-game .q-titlecard.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.quest-game .q-titlecard small {
+  font: 800 clamp(14px, 1.4vw, 22px) var(--ui);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9fd8ff;
+}
+.quest-game .q-titlecard b {
+  font: 900 clamp(34px, 4.4vw, 70px) var(--ui);
+  color: #ffe066;
+  text-shadow: 0 4px 0 #b06a00, 0 0 24px rgba(255, 224, 102, 0.4);
+}
+.quest-game .q-titlecard span {
+  font-size: clamp(14px, 1.4vw, 22px);
+  color: #e0ecff;
+}
+.quest-game .q-hint {
+  left: 50%;
+  bottom: clamp(16px, 4vh, 40px);
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(10, 30, 70, 0.6);
+  font: 700 clamp(14px, 1.3vw, 20px) var(--ui);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.quest-game .q-hint.show {
+  opacity: 1;
+}
+.quest-game .q-popups > div {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font: 900 clamp(18px, 1.8vw, 30px) var(--ui);
+  color: #ffe066;
+  text-shadow:
+    1px 1px 0 #6a3a00,
+    -1px 1px 0 #6a3a00,
+    1px -1px 0 #6a3a00,
+    -1px -1px 0 #6a3a00,
+    0 3px 0 rgba(80, 40, 0, 0.45);
+  animation: q-float 0.8s ease-out forwards;
+  white-space: nowrap;
+}
+@keyframes q-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20%) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -70%) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -190%) scale(1);
+  }
+}
+@keyframes q-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+.quest-game .hud-cam {
+  border: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Star tally */
+.quest-game .q-tally {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at center, rgba(10, 30, 80, 0.35), rgba(10, 20, 60, 0.7));
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.quest-game .q-tally.show {
+  opacity: 1;
+}
+.quest-game .q-tally-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2.4vh, 28px);
+  padding: clamp(20px, 3vw, 44px) clamp(24px, 4vw, 64px);
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(30, 70, 160, 0.92), rgba(14, 34, 96, 0.95));
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.55), 0 30px 80px rgba(0, 10, 40, 0.5);
+}
+.quest-game .q-tally-head {
+  font: 900 clamp(36px, 5vw, 80px) var(--ui);
+  color: #ffe066;
+  text-shadow: 0 5px 0 #b06a00, 0 0 30px rgba(255, 224, 102, 0.6);
+}
+.quest-game .q-tally-stars {
+  display: flex;
+  gap: clamp(14px, 3vw, 48px);
+}
+.quest-game .q-star {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.3s, transform 0.45s cubic-bezier(0.2, 1.8, 0.4, 1);
+  min-width: clamp(120px, 14vw, 210px);
+}
+.quest-game .q-star.shown {
+  opacity: 1;
+  transform: scale(1);
+}
+.quest-game .q-star i {
+  font-style: normal;
+  font-size: clamp(64px, 8vw, 130px);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.15);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+.quest-game .q-star.lit i {
+  color: #ffd34d;
+  text-shadow: 0 5px 0 #b07000, 0 0 30px rgba(255, 211, 77, 0.9);
+  animation: q-spin 0.6s ease;
+}
+@keyframes q-spin {
+  0% {
+    transform: rotate(-30deg) scale(0.4);
+  }
+  70% {
+    transform: rotate(8deg) scale(1.2);
+  }
+}
+.quest-game .q-star b {
+  font: 800 clamp(16px, 1.6vw, 26px) var(--ui);
+  color: #fff;
+}
+.quest-game .q-star span {
+  font-size: clamp(12px, 1.1vw, 17px);
+  color: #cfe3ff;
+}
+.quest-game .q-tally .btn.primary {
+  background: linear-gradient(180deg, #ffd84d, #ff9f1c);
+  color: #3a1d00;
+  box-shadow: 0 6px 0 #c06b00, 0 14px 30px rgba(255, 160, 30, 0.45);
+  font-weight: 800;
+}
+.quest-game .pause-menu {
+  z-index: 8;
+  background: rgba(10, 30, 80, 0.62);
+}
+
+/* ---- results --------------------------------------------------------------------------------------------- */
+.quest-results {
+  background:
+    radial-gradient(900px 500px at 80% -10%, rgba(255, 236, 160, 0.35), transparent 60%),
+    linear-gradient(180deg, #2a6fd6 0%, #4f9ff0 50%, #8fd0ff 100%);
+}
+.quest-results .res-card {
+  background: rgba(14, 34, 96, 0.72);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.quest-results .res-stars span.on {
+  display: inline-block;
+  animation: q-spin 0.6s ease both;
+}
+.quest-results .res-stars span.on:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.quest-results .res-stars span.on:nth-child(3) {
+  animation-delay: 0.5s;
+}
+.quest-results .btn.primary {
+  background: linear-gradient(180deg, #ffd84d, #ff9f1c);
+  color: #3a1d00;
+  box-shadow: 0 6px 0 #c06b00, 0 14px 30px rgba(255, 160, 30, 0.45);
+  font-weight: 800;
+}
+
+@media (max-aspect-ratio: 4/3) {
+  .quest-menu .menu-body {
+    grid-template-columns: 1fr;
+  }
+  .quest-game .q-tc {
+    display: none;
+  }
+}
