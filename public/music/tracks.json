@@ -1,0 +1,41 @@
+[
+  {
+    "id": "neon-drive",
+    "title": "Neon Drive",
+    "artist": "Move Arcade Originals",
+    "file": "neon-drive.mp3",
+    "credit": "Original track, CC0",
+    "colors": [
+      "#ff2d6a",
+      "#8a3bff"
+    ],
+    "bpm": 100,
+    "duration": 136.9
+  },
+  {
+    "id": "pulse-runner",
+    "title": "Pulse Runner",
+    "artist": "Move Arcade Originals",
+    "file": "pulse-runner.mp3",
+    "credit": "Original track, CC0",
+    "colors": [
+      "#00e5ff",
+      "#3b5bff"
+    ],
+    "bpm": 124,
+    "duration": 141.9
+  },
+  {
+    "id": "skyline",
+    "title": "Skyline",
+    "artist": "Move Arcade Originals",
+    "file": "skyline.mp3",
+    "credit": "Original track, CC0",
+    "colors": [
+      "#ffb000",
+      "#ff2d6a"
+    ],
+    "bpm": 138,
+    "duration": 141.6
+  }
+]
