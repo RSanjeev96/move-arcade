@@ -785,6 +785,56 @@ body {
 .hc-dot {
   fill: #fff;
 }
+.hc-frame {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: inset 0 0 0 3px rgba(125, 249, 255, 0.9);
+}
+.hc-frame.show {
+  opacity: 1;
+}
+.hc-frame i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 7px;
+  width: 0;
+  background: linear-gradient(90deg, #7df9ff, #fff);
+  box-shadow: 0 0 12px #7df9ff;
+}
+.hc-toast {
+  position: fixed;
+  left: 3vw;
+  top: 50%;
+  transform: translate(-30px, -50%);
+  z-index: 1001;
+  pointer-events: none;
+  padding: 14px 28px 14px 22px;
+  border-radius: 999px;
+  background: rgba(10, 6, 30, 0.8);
+  border: 2px solid #7df9ff;
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(20px, 3vw, 34px);
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+.hc-toast::before {
+  content: '\25C0  ';
+  color: #7df9ff;
+}
+.hc-toast.show {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
 
 /* ---- game ---- */
 .game {

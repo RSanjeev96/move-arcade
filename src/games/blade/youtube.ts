@@ -136,9 +136,9 @@ function tapScreen(env: GameEnv, yt: YouTubePlayer, saved?: YouTubeSong): Promis
         <div class="yt-tap-side glass">
           <p>Tap the big button <b>on every beat</b> of the song, at least 8 times. Keep going for a steadier result.</p>
           <button class="tap-pad" id="tap"><b>TAP</b><span>0 taps</span></button>
-          <div class="tap-bpm"><button class="btn sm" data-d="-1">−</button><b>– BPM</b><button class="btn sm" data-d="1">+</button></div>
+          <div class="tap-bpm"><button class="btn sm" data-hc data-d="-1">−</button><b>– BPM</b><button class="btn sm" data-hc data-d="1">+</button></div>
           <div class="calib-row">
-            <button class="btn sm" id="reset">Start over</button>
+            <button class="btn sm" data-hc id="reset">Start over</button>
             ${saved ? `<button class="btn sm" data-hc id="saved">Use saved (${Math.round(saved.bpm)} BPM)</button>` : ''}
           </div>
           <button class="btn primary big" data-hc id="start" disabled>${ICONS.play} Start game</button>

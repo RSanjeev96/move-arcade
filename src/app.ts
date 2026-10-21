@@ -141,6 +141,8 @@ export class App {
     this.pose?.stop();
     const sim = new SimPose();
     sim.drive = () => SIM_REST;
+    // Lets automated checks move the simulated player.
+    (window as unknown as { __sim?: SimPose }).__sim = sim;
     this.pose = sim;
     this.demo = true;
     this.body.calibrate(sim.latest());
@@ -200,7 +202,7 @@ export class App {
           <div class="bar"><i></i></div>
           <div class="calib-row">
             <button class="btn" data-hc id="cont" disabled>Continue</button>
-            <button class="btn ghost" id="back">Back</button>
+            <button class="btn ghost" data-hc id="back">Back</button>
           </div>
         </div>
       </div>`);
@@ -324,7 +326,7 @@ export class App {
             )
             .join('')}
         </div>
-        <div class="hint">${ICONS.hand} Raise a hand to point, then hold still on a button to press it</div>
+        <div class="hint">${ICONS.hand} Raise a hand to point and hold on a button to press it · flick your hand off the left edge to go back</div>
       </div>`);
     this.wireNav(el);
     this.cursor.setEnabled(true);

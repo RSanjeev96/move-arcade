@@ -165,7 +165,7 @@ export function pauseMenu(root: HTMLElement, cursor: (on: boolean) => void, extr
   const el = html(`
     <div class="pause-menu">
       <h2>Paused</h2>
-      <button class="btn primary" data-hc data-act="resume">Resume</button>
+      <button class="btn primary" data-hc data-back data-act="resume">Resume</button>
       ${extra.map((x) => `<button class="btn" data-hc data-act="${x.act}">${esc(x.label)}</button>`).join('')}
       <button class="btn" data-hc data-act="restart">Restart</button>
       <button class="btn ghost" data-hc data-act="quit">Quit to menu</button>
